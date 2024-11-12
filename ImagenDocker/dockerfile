@@ -26,8 +26,7 @@ RUN chmod +x /usr/local/bin/msp_IHaquatica
 # Actualiza PATH
 ENV PATH="/usr/local/bin:${PATH}"
 
-# Verifica la instalación de libgfortran.so usando find
-RUN find / -name "libgfortran.so*" || echo "libgfortran.so not found"
+ENV SCRIPT_NAME=Ejecutador.sh
 
 # Ejecuta msp_IHaquatica al iniciar el contenedor
-CMD ["msp_IHaquatica"]
+CMD ["/bin/bash", "-c", "/mnt/shared/${SCRIPT_NAME}"]
