@@ -1,0 +1,33 @@
+FROM ubuntu:20.04
+
+# Instala libsuitesparse y libgfortran5 para resolver la dependencia de libgfortran.so.3
+RUN apt-get update && \
+    apt-get install -y libsuitesparse-dev libgfortran5 && \
+    rm -rf /var/lib/apt/lists/*
+
+# Cambia el nombre del archivo libumfpack
+RUN mv /usr/lib/x86_64-linux-gnu/libumfpack.so.5.7.9 /usr/lib/x86_64-linux-gnu/libumfpack.so.5.6.2
+
+# Add the Bionic repository to sources.list to allow installing older packages
+RUN echo "deb http://gb.archive.ubuntu.com/ubuntu/ bionic main universe" >> /etc/apt/sources.list
+
+RUN apt-get update && \
+    apt-get install -y g++-6 gcc-6 libgfortran3 && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 6
+RUN strings /usr/lib/x86_64-linux-gnu/libgfortran.so.3.0.0 | grep GFORTRAN || echo "libgfortran.so.3.0.0 not found"
+
+
+# Copia el ejecutable a /usr/local/bin y dale permisos de ejecución
+COPY ./ejecutable/msp_IHaquatica /usr/local/bin/
+RUN chmod +x /usr/local/bin/msp_IHaquatica
+
+# Actualiza PATH
+ENV PATH="/usr/local/bin:${PATH}"
+
+# Verifica la instalación de libgfortran.so usando find
+RUN find / -name "libgfortran.so*" || echo "libgfortran.so not found"
+
+# Ejecuta msp_IHaquatica al iniciar el contenedor
+CMD ["msp_IHaquatica"]
